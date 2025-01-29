@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class Match3 : MonoBehaviour 
 {
@@ -16,10 +18,13 @@ public class Match3 : MonoBehaviour
     [SerializeField] private Ease ease = Ease.InSine;
     [SerializeField] private ParticleSystem explosionVFX;
 
+    [SerializeField] private Tilemap tilemap;
+
     private Grid2D<GridObject<Gem>> _grid;
     private InputReader _inputReader;
     private Vector2Int _selectedGem = Vector2Int.one * -1;
     private AudioManager _audioManager;
+    
 
     private void Awake() 
     {
@@ -36,6 +41,55 @@ public class Match3 : MonoBehaviour
     private void OnDestroy() 
     {
         _inputReader.FireEvent -= OnSelectGem;
+    }
+
+
+    private void InitializeGrid()
+    {
+        _grid = Grid2D<GridObject<Gem>>.VerticalGrid(tilemap.size.x, tilemap.size.y, tilemap.cellSize.x, tilemap.origin, debug);
+        for (int x = 0; x < tilemap.size.x; x++)
+        {
+            for (int y = 0; y < tilemap.size.y; y++)
+            {
+                if (tilemap.HasTile(tilemap.origin + new Vector3Int(x, y, tilemap.origin.z)))
+                {
+                    CreateGem(x, y);
+                }
+                else
+                {
+                    _grid.BlockTile(new Vector2Int(x, y));
+                }
+            }
+        }
+    }
+
+    private void CreateGem(int x, int y)
+    {
+        Gem gem = Instantiate(gemPrefab, _grid.GetWorldPositionCenter(x, y), Quaternion.identity, transform);
+
+        List<GemTypeSO> forbiddenTypes = new();
+        
+        // get type to the left and left + 1
+        if  (_grid.IsValid(x - 1, y) && !_grid.IsEmpty(x - 1, y))
+        {
+            forbiddenTypes.Add(_grid.GetValue(x - 1, y).GetValue().GetGemType());
+        }
+        // get type down and down + 1
+        if  (_grid.IsValid(x, y - 1) && !_grid.IsEmpty(x, y - 1))
+        {
+            forbiddenTypes.Add(_grid.GetValue(x, y - 1).GetValue().GetGemType());
+        }
+
+        GemTypeSO[] allowedTypes = gemTypes.Except(forbiddenTypes).ToArray();
+
+        gem.SetType(allowedTypes[Random.Range(0, allowedTypes.Length)]);
+        var gridObject = new GridObject<Gem>(_grid, x, y);
+        gridObject.SetValue(gem);
+        _grid.SetValue(x, y, gridObject);
+
+        
+        
+        
     }
 
     private void OnSelectGem()
@@ -69,10 +123,22 @@ public class Match3 : MonoBehaviour
         yield return SwapGems(gridPosA, gridPosB);
 
         List<Vector2Int> matches = FindMatches();
-        yield return ExplodeGems(matches);
+        
+        do 
+        {
+            yield return ExplodeGems(matches);
 
-        yield return MakeGemsFall();
+            //yield return new WaitForSeconds(0.5f);
 
+            yield return MakeGemsFall();
+
+            yield return new WaitForSeconds(1f);
+
+            matches = FindMatches();
+        }
+
+        while (matches.Count > 0);
+        
         yield return FillEmptySpots();
         
         yield return new WaitForSeconds(0.5f);
@@ -128,17 +194,23 @@ public class Match3 : MonoBehaviour
         {
             for (var y = 0; y < height; y++) 
             {
-                if (_grid.IsEmpty(x, y)) 
+                if (_grid.IsValid(x, y) && _grid.IsEmpty(x, y)) 
                 {
                     for (var i = y + 1; i < height; i++) 
                     {
-                        if (!_grid.IsEmpty(x, i)) {
+                        if (!_grid.IsValid(x, i))
+                        {
+                            break;
+                        }
+
+                        if (!_grid.IsEmpty(x, i)) 
+                        {
                             var gem = _grid.GetValue(x, i).GetValue();
                             _grid.SetValue(x, y, _grid.GetValue(x, i));
                             _grid.SetValue(x, i, null);
                             gem.transform
-                                .DOLocalMove(_grid.GetWorldPositionCenter(x, y), 0.5f)
-                                .SetEase(ease);
+                                .DOLocalMove(_grid.GetWorldPositionCenter(x, y), 1f)
+                                .SetEase(Ease.OutBounce);
                             yield return new WaitForSeconds(0.1f);
                             break;
                         }
@@ -154,7 +226,7 @@ public class Match3 : MonoBehaviour
         {
             for (var y = 0; y < height; y++) 
             {
-                if (_grid.GetValue(x, y) == null) 
+                if (_grid.IsValid(x, y) && _grid.IsEmpty(x, y)) 
                 {
                     CreateGem(x, y);
                     yield return new WaitForSeconds(0.1f);;
@@ -221,24 +293,7 @@ public class Match3 : MonoBehaviour
 
 
 
-    private void InitializeGrid()
-    {
-        _grid = Grid2D<GridObject<Gem>>.VerticalGrid(width, height, cellSize, origin, debug);
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                CreateGem(x, y);
-            }
-        }
-    }
 
-    private void CreateGem(int x, int y)
-    {
-        Gem gem = Instantiate(gemPrefab, _grid.GetWorldPositionCenter(x, y), Quaternion.identity, transform);
-        gem.SetType(gemTypes[Random.Range(0, gemTypes.Length)]);
-        var gridObject = new GridObject<Gem>(_grid, x, y);
-        gridObject.SetValue(gem);
-        _grid.SetValue(x, y, gridObject);
-    }
+
+    
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -11,6 +13,7 @@ public class Grid2D<T>
     readonly T[,] gridArray;
     readonly CoordinateConverter coordinateConverter;
     public event Action<int, int, T> OnGridValueChanged;
+    private List<Vector2Int> blockedTiles = new();
 
     /// <summary>
     /// Factory method for Vectical 2D Grid.
@@ -43,6 +46,11 @@ public class Grid2D<T>
         }
     }
 
+    public void BlockTile(Vector2Int tile)
+    {
+        blockedTiles.Add(tile);
+    }
+
     public void SetValue(Vector3 worldPosition, T value)
     {
         Vector2Int pos = GetXY(worldPosition);
@@ -72,8 +80,8 @@ public class Grid2D<T>
     private Vector3 GetWorldPosition(int x, int y) => coordinateConverter.GridToWorld(x, y, cellSize, origin);
     public Vector3 GetWorldPositionCenter(int x, int y) => coordinateConverter.GridToWorldCenter(x, y, cellSize, origin);
     public Vector2Int GetXY(Vector3 worldPosition) => coordinateConverter.WorldToGrid(worldPosition, cellSize, origin);
-    public bool IsValid(int x, int y) => x >= 0 && y >=0 && x < width && y < height;
-    public bool IsEmpty(int x, int y) => GetValue(x, y) == null;
+    public bool IsValid(int x, int y) => x >= 0 && y >=0 && x < width && y < height && !blockedTiles.Any(v => v.Equals(new Vector2Int(x, y)));
+    public bool IsEmpty(int x, int y) => IsValid(x, y) && GetValue(x, y) == null;
 
     private void DrawDebugLines()
     {
