@@ -12,11 +12,9 @@ public class Match3 : MonoBehaviour
     [SerializeField] private float cellSize = 1f;
     [SerializeField] private Vector3 origin = Vector3.zero;
     [SerializeField] private bool debug = true;
-
     [SerializeField] private Gem gemPrefab;
     [SerializeField] private GemTypeSO[] gemTypes;
     [SerializeField] private ParticleSystem explosionVFX;
-
     [SerializeField] private Tilemap tilemap;
 
     private Grid2D<GridObject<Gem>> _grid;
@@ -99,14 +97,14 @@ public class Match3 : MonoBehaviour
         }
         else
         {
-            StartCoroutine(RunGameLoop(_selectedGem, gridPos));
+            StartCoroutine(SwapSequence(_selectedGem, gridPos));
         }
     }
 
     private void DeselectGem() => _selectedGem = new Vector2Int(-1, -1);
     private void SelectGem(Vector2Int gridPos) => _selectedGem = gridPos;
 
-    IEnumerator RunGameLoop(Vector2Int gridPosA, Vector2Int gridPosB)
+    IEnumerator SwapSequence(Vector2Int gridPosA, Vector2Int gridPosB)
     {
         DeselectGem();
 
@@ -279,11 +277,5 @@ public class Match3 : MonoBehaviour
         }
 
         return new List<Vector2Int>(matches);
-    }
-
-
-
-
-
-    
+    }    
 }

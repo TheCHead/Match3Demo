@@ -30,5 +30,4 @@ public class InputReader : MonoBehaviour
     {
         _fireAction.performed -= OnFireAction;
     }
-
 }
