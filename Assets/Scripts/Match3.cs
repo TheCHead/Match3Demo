@@ -15,7 +15,6 @@ public class Match3 : MonoBehaviour
 
     [SerializeField] private Gem gemPrefab;
     [SerializeField] private GemTypeSO[] gemTypes;
-    [SerializeField] private Ease ease = Ease.InSine;
     [SerializeField] private ParticleSystem explosionVFX;
 
     [SerializeField] private Tilemap tilemap;
@@ -46,18 +45,15 @@ public class Match3 : MonoBehaviour
 
     private void InitializeGrid()
     {
-        _grid = Grid2D<GridObject<Gem>>.VerticalGrid(tilemap.size.x, tilemap.size.y, tilemap.cellSize.x, tilemap.origin, debug);
+        _grid = Grid2D<GridObject<Gem>>.TilemapGrid(tilemap, debug);
+
         for (int x = 0; x < tilemap.size.x; x++)
         {
             for (int y = 0; y < tilemap.size.y; y++)
             {
-                if (tilemap.HasTile(tilemap.origin + new Vector3Int(x, y, tilemap.origin.z)))
+                if (_grid.IsEmpty(x, y))
                 {
                     CreateGem(x, y);
-                }
-                else
-                {
-                    _grid.BlockTile(new Vector2Int(x, y));
                 }
             }
         }
@@ -69,27 +65,21 @@ public class Match3 : MonoBehaviour
 
         List<GemTypeSO> forbiddenTypes = new();
         
-        // get type to the left and left + 1
         if  (_grid.IsValid(x - 1, y) && !_grid.IsEmpty(x - 1, y))
         {
             forbiddenTypes.Add(_grid.GetValue(x - 1, y).GetValue().GetGemType());
         }
-        // get type down and down + 1
         if  (_grid.IsValid(x, y - 1) && !_grid.IsEmpty(x, y - 1))
         {
             forbiddenTypes.Add(_grid.GetValue(x, y - 1).GetValue().GetGemType());
         }
-
         GemTypeSO[] allowedTypes = gemTypes.Except(forbiddenTypes).ToArray();
-
         gem.SetType(allowedTypes[Random.Range(0, allowedTypes.Length)]);
+
         var gridObject = new GridObject<Gem>(_grid, x, y);
         gridObject.SetValue(gem);
-        _grid.SetValue(x, y, gridObject);
 
-        
-        
-        
+        _grid.SetValue(x, y, gridObject);
     }
 
     private void OnSelectGem()
@@ -151,11 +141,11 @@ public class Match3 : MonoBehaviour
         
         gridObjectA.GetValue().transform
             .DOLocalMove(_grid.GetWorldPositionCenter(gridPosB.x, gridPosB.y), 0.5f)
-            .SetEase(ease);
+            .SetEase(Ease.InSine);
         
         gridObjectB.GetValue().transform
             .DOLocalMove(_grid.GetWorldPositionCenter(gridPosA.x, gridPosA.y), 0.5f)
-            .SetEase(ease);
+            .SetEase(Ease.InSine);
 
         _grid.SetValue(gridPosA.x, gridPosA.y, gridObjectB);
         _grid.SetValue(gridPosB.x, gridPosB.y, gridObjectA);

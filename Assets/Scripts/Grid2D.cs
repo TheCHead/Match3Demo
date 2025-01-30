@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class Grid2D<T>
 {
@@ -11,16 +11,16 @@ public class Grid2D<T>
     readonly float cellSize;
     readonly Vector3 origin;
     readonly T[,] gridArray;
+    readonly int[,] mask;
     readonly CoordinateConverter coordinateConverter;
     public event Action<int, int, T> OnGridValueChanged;
-    private List<Vector2Int> blockedTiles = new();
 
     /// <summary>
     /// Factory method for Vectical 2D Grid.
     /// </summary>
     public static Grid2D<T> VerticalGrid(int width, int height, float cellSize, Vector3 origin, bool debug = false)
     {
-        return new Grid2D<T>(width, height, cellSize, origin, new VerticalConverter(), debug);
+        return new Grid2D<T>(width, height, cellSize, origin, new VerticalConverter(), GetDefaultMask(width, height), debug);
     }
 
     /// <summary>
@@ -28,10 +28,16 @@ public class Grid2D<T>
     /// </summary>
     public static Grid2D<T> HorizontalGrid(int width, int height, float cellSize, Vector3 origin, bool debug = false)
     {
-        return new Grid2D<T>(width, height, cellSize, origin, new HorizontalConverter(), debug);
+        return new Grid2D<T>(width, height, cellSize, origin, new HorizontalConverter(), GetDefaultMask(width, height), debug);
     }
 
-    public Grid2D(int width, int height, float cellSize, Vector3 origin, CoordinateConverter coordinateConverter, bool debug)
+    public static Grid2D<T> TilemapGrid(Tilemap tilemap, bool debug = false)
+    {
+
+        return new Grid2D<T>(tilemap.size.x, tilemap.size.y, tilemap.cellSize.x, tilemap.origin, new VerticalConverter(), GetTilemapMask(tilemap), debug);
+    }
+
+    public Grid2D(int width, int height, float cellSize, Vector3 origin, CoordinateConverter coordinateConverter, int[,] gridMask, bool debug)
     {
         this.width = width;
         this.height = height;
@@ -39,6 +45,7 @@ public class Grid2D<T>
         this.origin = origin;
         this.coordinateConverter = coordinateConverter ?? new VerticalConverter();
         gridArray = new T[width, height];
+        mask = gridMask;
 
         if (debug)
         {
@@ -46,9 +53,32 @@ public class Grid2D<T>
         }
     }
 
-    public void BlockTile(Vector2Int tile)
+    private static int[,] GetDefaultMask(int width, int height)
     {
-        blockedTiles.Add(tile);
+        int[,] gridMask = new int[width, height];
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                gridMask[x, y] = 1;
+            }
+        }
+
+        return gridMask;
+    }
+
+    private static int[,] GetTilemapMask(Tilemap tilemap)
+    {
+        int[,] gridMask = new int[tilemap.size.x, tilemap.size.y];
+        for (int x = 0; x < tilemap.size.x; x++)
+        {
+            for (int y = 0; y < tilemap.size.y; y++)
+            {
+                gridMask[x, y] = tilemap.HasTile(tilemap.origin + new Vector3Int(x, y, tilemap.origin.z)) ? 1 : 0;
+            }
+        }
+
+        return gridMask;
     }
 
     public void SetValue(Vector3 worldPosition, T value)
@@ -80,7 +110,7 @@ public class Grid2D<T>
     private Vector3 GetWorldPosition(int x, int y) => coordinateConverter.GridToWorld(x, y, cellSize, origin);
     public Vector3 GetWorldPositionCenter(int x, int y) => coordinateConverter.GridToWorldCenter(x, y, cellSize, origin);
     public Vector2Int GetXY(Vector3 worldPosition) => coordinateConverter.WorldToGrid(worldPosition, cellSize, origin);
-    public bool IsValid(int x, int y) => x >= 0 && y >=0 && x < width && y < height && !blockedTiles.Any(v => v.Equals(new Vector2Int(x, y)));
+    public bool IsValid(int x, int y) => x >= 0 && y >=0 && x < width && y < height && mask[x, y] == 1;
     public bool IsEmpty(int x, int y) => IsValid(x, y) && GetValue(x, y) == null;
 
     private void DrawDebugLines()
