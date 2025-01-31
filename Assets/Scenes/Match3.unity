@@ -1019,6 +1019,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7b080d2b2707b4bd78489f2b5d92ab5b, type: 2}
   - {fileID: 11400000, guid: 4303c6cc3ecab41a887d102090ab2b39, type: 2}
   - {fileID: 11400000, guid: 7dcdffa210a774b768d756465b83883e, type: 2}
+  explosionVfx: {fileID: 2367235383565965529, guid: 0e9c62d38761343fea01c223bd11fd02, type: 3}
 --- !u!4 &578967505
 Transform:
   m_ObjectHideFlags: 0

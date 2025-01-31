@@ -10,6 +10,8 @@ public class EcsEntry : MonoBehaviour
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private InputReader inputReader;
     [SerializeField] private List<GemTypeSO> gemTypes;
+    [SerializeField] private ParticleSystem explosionVfx;
+
     private Group<float> _systems;
 
     private void Start() 
@@ -24,7 +26,9 @@ public class EcsEntry : MonoBehaviour
             new SpawnGemsSystem(world, gemPrefab, gemTypes),
             new InputSystem(world, inputReader),
             new TileSelectionSystem(world),
-            new SwapTilesSystem(world)
+            new SwapTilesSystem(world),
+            new MatchGemsSystem(world),
+            new ExplodeGemsSystem(world, explosionVfx)
         );
 
         _systems.Initialize(); 

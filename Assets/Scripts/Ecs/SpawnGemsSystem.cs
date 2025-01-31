@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Arch.Core;
+using Arch.Core.Extensions;
 using Arch.System;
 using UnityEngine;
 
@@ -37,11 +38,11 @@ public class SpawnGemsSystem : BaseSystem<World, float>
         
         if  (grid.IsValidTile(x - 1, y) && !grid.IsEmptyTile(x - 1, y))
         {
-            forbiddenTypes.Add(grid.GetTileValue(x - 1, y).GetGemType());
+            forbiddenTypes.Add(grid.GetTileValue(x - 1, y).Get<GemComponent>().gem.GetGemType());
         }
         if  (grid.IsValidTile(x, y - 1) && !grid.IsEmptyTile(x, y - 1))
         {
-            forbiddenTypes.Add(grid.GetTileValue(x, y - 1).GetGemType());
+            forbiddenTypes.Add(grid.GetTileValue(x, y - 1).Get<GemComponent>().gem.GetGemType());
         }
         GemTypeSO[] allowedTypes = gemTypes.Except(forbiddenTypes).ToArray();
         gem.SetType(allowedTypes[Random.Range(0, allowedTypes.Length)]);

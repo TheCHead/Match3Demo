@@ -2,27 +2,34 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Arch.System;
 using DG.Tweening;
+using UnityEngine;
 
 public class SwapTilesSystem : BaseSystem<World, float>
 {
-    private QueryDescription _desc = new QueryDescription().WithAll<GridComponent, SwapTilesComponent>();
+    private QueryDescription _swapDesc = new QueryDescription().WithAll<GridComponent, SwapTilesComponent>();
+    private QueryDescription _swapProcessDesc = new QueryDescription().WithAll<GridComponent, SwapTilesProcessComponent>();
     public SwapTilesSystem(World world) : base(world) {}
 
     public override void Update(in float deltaTime)
     {
-        World.Query(in _desc, (Entity entity, ref GridComponent grid, ref SwapTilesComponent swap) => {
+        World.Query(in _swapDesc, (Entity entity, ref GridComponent grid, ref SwapTilesComponent swap) => {
             var tileA = grid.GetTileValue(swap.tileA);
             var tileB = grid.GetTileValue(swap.tileB);
 
             if (tileA.Has<GemComponent>() && tileB.Has<GemComponent>())
             {
-                tileA.Get<GemComponent>().gem.transform
-                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(swap.tileB.x, swap.tileB.y, grid.cellSize, grid.origin), 0.5f)
-                .SetEase(Ease.InSine);
+                Sequence swapSequence = DOTween.Sequence();
+                swapSequence.SetAutoKill(false);
 
-                tileB.Get<GemComponent>().gem.transform
+                swapSequence.Append(tileA.Get<GemComponent>().gem.transform
+                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(swap.tileB.x, swap.tileB.y, grid.cellSize, grid.origin), 0.5f)
+                .SetEase(Ease.InSine));
+
+                swapSequence.Join(tileB.Get<GemComponent>().gem.transform
                 .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(swap.tileA.x, swap.tileA.y, grid.cellSize, grid.origin), 0.5f)
-                .SetEase(Ease.InSine);
+                .SetEase(Ease.InSine));
+
+                entity.Add(new SwapTilesProcessComponent(swapSequence));
 
                 grid.SetTileValue(swap.tileA.x, swap.tileA.y, tileB);
                 grid.SetTileValue(swap.tileB.x, swap.tileB.y, tileA);
@@ -30,5 +37,15 @@ public class SwapTilesSystem : BaseSystem<World, float>
 
             entity.Remove<SwapTilesComponent>();
         });  
+
+        World.Query(in _swapProcessDesc, (Entity entity, ref GridComponent grid, ref SwapTilesProcessComponent swapProcess) => {
+            if (swapProcess.sequence.IsComplete())
+            {
+                swapProcess.sequence.Kill();
+                entity.Remove<SwapTilesProcessComponent>();
+                entity.Add(new MatchGemsComponent());
+                Debug.Log("Swap Process Complete");
+            }
+        });
     }
 }

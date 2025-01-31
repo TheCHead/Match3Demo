@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TileSelectionSystem : BaseSystem<World, float>
 {
-    private QueryDescription _desc = new QueryDescription().WithAll<GridComponent>();
+    private QueryDescription _desc = new QueryDescription().WithAll<GridComponent>().WithNone<SwapTilesProcessComponent>();
     public TileSelectionSystem(World world) : base(world) {}
 
     public override void Update(in float deltaTime)
