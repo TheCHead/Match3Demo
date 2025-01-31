@@ -20,9 +20,10 @@ public class InitializeGridSystem : BaseSystem<World, float>
             grid.height = tilemap.tilemap.size.y;
             grid.cellSize = tilemap.tilemap.cellSize.x;
             grid.origin = tilemap.tilemap.origin;
-            grid.gridArray = new Gem[grid.width, grid.height];
+            grid.gridArray = new Entity[grid.width, grid.height];
             grid.mask = GetTilemapMask(tilemap.tilemap);
             grid.coordinateConverter = new Grid2D<Gem>.VerticalConverter();
+            grid.tileSelection = new();
         });  
     }
 
@@ -36,7 +37,6 @@ public class InitializeGridSystem : BaseSystem<World, float>
                 gridMask[x, y] = tilemap.HasTile(tilemap.origin + new Vector3Int(x, y, tilemap.origin.z)) ? 1 : 0;
             }
         }
-
         return gridMask;
     }
 }

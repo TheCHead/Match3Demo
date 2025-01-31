@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Arch.Core;
 using Arch.System;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class EcsEntry : MonoBehaviour
     [SerializeField] private Gem gemPrefab;
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private InputReader inputReader;
+    [SerializeField] private List<GemTypeSO> gemTypes;
     private Group<float> _systems;
 
     private void Start() 
@@ -19,8 +21,10 @@ public class EcsEntry : MonoBehaviour
             "Match3",
             new InitializeGridSystem(world),
             new DrawDebugGridSystem(world),
-            new SpawnGemsSystem(world, gemPrefab),
-            new InputSystem(world, inputReader)
+            new SpawnGemsSystem(world, gemPrefab, gemTypes),
+            new InputSystem(world, inputReader),
+            new TileSelectionSystem(world),
+            new SwapTilesSystem(world)
         );
 
         _systems.Initialize(); 
@@ -36,33 +40,5 @@ public class EcsEntry : MonoBehaviour
     private void OnDestroy() 
     {
          _systems.Dispose();  
-    }
-}
-
-public class InputSystem : BaseSystem<World, float>
-{
-    private QueryDescription _desc = new QueryDescription().WithAll<GridComponent, TilemapComponent>();
-    public InputSystem(World world, InputReader reader) : base(world) {
-        _inputReader = reader;
-        _inputReader.FireEvent += OnFireEvent;
-    }
-    private InputReader _inputReader;
-
-    private void OnFireEvent()
-    {
-        World.Query(in _desc, (ref GridComponent grid) => {
-            var gridPos = grid.coordinateConverter.WorldToGrid(Camera.main.ScreenToWorldPoint(_inputReader.Selected), grid.cellSize, grid.origin);
-
-            if (grid.IsValidTile(gridPos.x, gridPos.y))
-            {
-                Debug.Log($"Clicked tile: {gridPos.x}-{gridPos.y}");
-            }
-        });  
-    }
-
-    public override void Dispose()
-    {
-        base.Dispose();
-        _inputReader.FireEvent -= OnFireEvent;
     }
 }

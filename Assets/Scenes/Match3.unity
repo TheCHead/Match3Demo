@@ -1015,6 +1015,10 @@ MonoBehaviour:
   gemPrefab: {fileID: 3615287848732873903, guid: 44dd55f7caed844cb94eef5dafe779d3, type: 3}
   tilemap: {fileID: 309189884}
   inputReader: {fileID: 2012903671}
+  gemTypes:
+  - {fileID: 11400000, guid: 7b080d2b2707b4bd78489f2b5d92ab5b, type: 2}
+  - {fileID: 11400000, guid: 4303c6cc3ecab41a887d102090ab2b39, type: 2}
+  - {fileID: 11400000, guid: 7dcdffa210a774b768d756465b83883e, type: 2}
 --- !u!4 &578967505
 Transform:
   m_ObjectHideFlags: 0
