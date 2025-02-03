@@ -32,12 +32,12 @@ public class Match3 : MonoBehaviour
     private void Start() 
     {
         InitializeGrid();
-        _inputReader.FireEvent += OnSelectGem;
+        //_inputReader.FireEvent += OnSelectGem;
     }
 
     private void OnDestroy() 
     {
-        _inputReader.FireEvent -= OnSelectGem;
+        //_inputReader.FireEvent -= OnSelectGem;
     }
 
 

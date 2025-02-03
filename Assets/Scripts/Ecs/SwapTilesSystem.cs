@@ -13,12 +13,16 @@ public class SwapTilesSystem : BaseSystem<World, float>
     public override void Update(in float deltaTime)
     {
         World.Query(in _swapDesc, (Entity entity, ref GridComponent grid, ref SwapTilesComponent swap) => {
+            
+            if (!grid.IsGemTile(swap.tileA) || !grid.IsGemTile(swap.tileB))
+            {
+                entity.Remove<SwapTilesComponent>();
+            }
+
             var tileA = grid.GetTileValue(swap.tileA);
             var tileB = grid.GetTileValue(swap.tileB);
 
-            if (tileA.Has<GemComponent>() && tileB.Has<GemComponent>())
-            {
-                Sequence swapSequence = DOTween.Sequence();
+            Sequence swapSequence = DOTween.Sequence();
                 swapSequence.SetAutoKill(false);
 
                 swapSequence.Append(tileA.Get<GemComponent>().gem.transform
@@ -33,7 +37,6 @@ public class SwapTilesSystem : BaseSystem<World, float>
 
                 grid.SetTileValue(swap.tileA.x, swap.tileA.y, tileB);
                 grid.SetTileValue(swap.tileB.x, swap.tileB.y, tileA);
-            }
 
             entity.Remove<SwapTilesComponent>();
         });  

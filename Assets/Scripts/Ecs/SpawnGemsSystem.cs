@@ -8,15 +8,17 @@ using UnityEngine;
 public class SpawnGemsSystem : BaseSystem<World, float>
 {
     private QueryDescription _desc = new QueryDescription().WithAll<GridComponent>();
+    private QueryDescription _spawnDesc = new QueryDescription().WithAll<GridComponent, SpawnGemsComponent>();
     public SpawnGemsSystem(World world, Gem gemPrefab, List<GemTypeSO> gemTypes) : base(world) {_gemPrefab = gemPrefab; _gemTypes = gemTypes;}
 
     private Gem _gemPrefab;
     private List<GemTypeSO> _gemTypes;
+    private GameObject _parent;
 
     public override void Initialize()
     {
         base.Initialize();
-        GameObject parent = new GameObject("Gems");
+        _parent = new GameObject("Gems");
         // Run query, can also run multiple queries inside the update method
         World.Query(in _desc, (ref GridComponent grid) => {
             for (int x = 0; x < grid.width; x++)
@@ -24,10 +26,33 @@ public class SpawnGemsSystem : BaseSystem<World, float>
                 for (int y = 0; y < grid.height; y++)
                 {
                     if (grid.mask[x, y] == 1)
-                        CreateGem(ref grid, x, y, _gemTypes, parent.transform);
+                        CreateGem(ref grid, x, y, _gemTypes, _parent.transform);
                 }
             }
         });  
+    }
+
+    public override void Update(in float deltaTime)
+    {
+        World.Query(in _spawnDesc, (Entity entity, ref GridComponent grid, ref SpawnGemsComponent spawn) => {
+
+            if (spawn.delayCounter < spawn.delay)
+            {
+                spawn.delayCounter += Time.deltaTime;
+                return;
+            }
+
+            for (int x = 0; x < grid.width; x++)
+            {
+                for (int y = 0; y < grid.height; y++)
+                {
+                    if (grid.IsEmptyTile(x, y) && grid.mask[x, y] == 1)
+                        CreateGem(ref grid, x, y, _gemTypes, _parent.transform);
+                }
+            }
+            
+            entity.Remove<SpawnGemsComponent>();
+        });
     }
     
     private void CreateGem(ref GridComponent grid, int x, int y, List<GemTypeSO> gemTypes, Transform parent)

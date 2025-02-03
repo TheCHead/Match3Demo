@@ -16,7 +16,11 @@ public class MatchGemsSystem : BaseSystem<World, float>
             List<Vector2Int> matches = FindMatches(ref grid);
             if (matches.Count > 0)
             {
-                entity.Add(new ExplodeGemsComponent(matches));
+                entity.Add(new ExplodeGemsComponent(matches, 0.1f));
+            }
+            else
+            {
+                entity.Add(new SpawnGemsComponent(0.75f));
             }
             entity.Remove<MatchGemsComponent>();
         });
@@ -36,8 +40,6 @@ public class MatchGemsSystem : BaseSystem<World, float>
                 var gemA = grid.GetTileValue(x, y);
                 var gemB = grid.GetTileValue(x + 1, y);
                 var gemC = grid.GetTileValue(x + 2, y);
-
-                //if (!gemA.Has<GemComponent>() || !gemB.Has<GemComponent>() || !gemC.Has<GemComponent>()) continue;
 
                 if (gemA.Get<GemComponent>().gem.GetGemType() == gemB.Get<GemComponent>().gem.GetGemType() && gemB.Get<GemComponent>().gem.GetGemType() == gemC.Get<GemComponent>().gem.GetGemType())
                 {
@@ -59,8 +61,6 @@ public class MatchGemsSystem : BaseSystem<World, float>
                 var gemB = grid.GetTileValue(x, y + 1);
                 var gemC = grid.GetTileValue(x, y + 2);
 
-                //if (!gemA.Has<GemComponent>() || !gemB.Has<GemComponent>() || !gemC.Has<GemComponent>()) continue;
-
                 if (gemA.Get<GemComponent>().gem.GetGemType() == gemB.Get<GemComponent>().gem.GetGemType() && gemB.Get<GemComponent>().gem.GetGemType() == gemC.Get<GemComponent>().gem.GetGemType())
                 {
                     matches.Add(new Vector2Int(x, y));
@@ -68,15 +68,6 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     matches.Add(new Vector2Int(x, y + 2));
                 }
             }
-        }
-
-        if (matches.Count == 0)
-        {
-            //_audioManager.PlayeNoMatch();
-        }
-        else
-        {
-            //_audioManager.PlayMatch();
         }
 
         return new List<Vector2Int>(matches);

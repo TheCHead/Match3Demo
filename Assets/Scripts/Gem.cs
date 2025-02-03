@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class Gem : MonoBehaviour
 {
+    [SerializeField] private ParticleSystem explodeVfx;
     private GemTypeSO _type;
 
     public void SetType(GemTypeSO type)
@@ -15,6 +16,15 @@ public class Gem : MonoBehaviour
 
     public void DestroyGem()
     {
-        Destroy(gameObject, 0.2f);
+        ExplodeVFX(transform.position);
+        Destroy(gameObject);
+    }
+
+    private void ExplodeVFX(Vector3 position)
+    {
+        // TODO: pool
+        var fx = GameObject.Instantiate(explodeVfx);
+        fx.transform.position = position;
+        GameObject.Destroy(fx.gameObject, 2f);
     }
 }

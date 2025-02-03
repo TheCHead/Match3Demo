@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.annulusgames.arch.unity": "https://github.com/AnnulusGames/Arch.Unity.git?path=src/Arch.Unity/Assets/Arch.Unity",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
     "com.unity.collab-proxy": "2.6.0",
     "com.unity.feature.2d": "2.0.1",

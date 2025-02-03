@@ -35,4 +35,5 @@ public struct GridComponent
     public bool IsEmptyTile(int x, int y) => IsValidTile(x, y) && (gridArray[x, y] == null || gridArray[x, y] == Entity.Null);
     public bool IsObjectTile(int x, int y) => IsValidTile(x, y) && gridArray[x, y] != null && gridArray[x, y] != Entity.Null;
     public bool IsGemTile(int x, int y) => IsObjectTile(x, y) && gridArray[x, y].Has<GemComponent>();
+    public bool IsGemTile(Vector2Int gridPos) => IsGemTile(gridPos.x, gridPos.y);
 }

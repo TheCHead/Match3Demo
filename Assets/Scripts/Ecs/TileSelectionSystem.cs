@@ -17,7 +17,7 @@ public class TileSelectionSystem : BaseSystem<World, float>
                 Vector2Int tileB = grid.tileSelection[1];
                 if (!tileA.Equals(tileB))
                 {
-                    entity.Add(new SwapTilesComponent(tileA, tileB));
+                    entity.Add(new SwapTilesComponent(tileA, tileB), new BlockedComponent());
                 }
                 grid.tileSelection.Clear();
             }

@@ -4,14 +4,12 @@ using Arch.System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class EcsEntry : MonoBehaviour
+public partial class EcsEntry : MonoBehaviour
 {
     [SerializeField] private Gem gemPrefab;
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private InputReader inputReader;
     [SerializeField] private List<GemTypeSO> gemTypes;
-    [SerializeField] private ParticleSystem explosionVfx;
-
     private Group<float> _systems;
 
     private void Start() 
@@ -28,7 +26,9 @@ public class EcsEntry : MonoBehaviour
             new TileSelectionSystem(world),
             new SwapTilesSystem(world),
             new MatchGemsSystem(world),
-            new ExplodeGemsSystem(world, explosionVfx)
+            new ExplodeGemsSystem(world),
+            new GemFallSystem(world),
+            new UnblockGridSystem(world)
         );
 
         _systems.Initialize(); 
