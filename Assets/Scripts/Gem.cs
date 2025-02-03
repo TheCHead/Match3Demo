@@ -1,10 +1,13 @@
 using UnityEngine;
+using UnityEngine.Pool;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class Gem : MonoBehaviour
+public class Gem : MonoBehaviour, IPoolObject<Gem>
 {
-    [SerializeField] private ParticleSystem explodeVfx;
+    [SerializeField] private ExplosionVfx explodeVfx;
     private GemTypeSO _type;
+    private IObjectPool<Gem> _pool;
+    private static IObjectPool<ExplosionVfx> _vfxPool;
 
     public void SetType(GemTypeSO type)
     {
@@ -17,14 +20,23 @@ public class Gem : MonoBehaviour
     public void DestroyGem()
     {
         ExplodeVFX(transform.position);
-        Destroy(gameObject);
+        _pool.Release(this);
     }
 
     private void ExplodeVFX(Vector3 position)
     {
-        // TODO: pool
-        var fx = GameObject.Instantiate(explodeVfx);
-        fx.transform.position = position;
-        GameObject.Destroy(fx.gameObject, 2f);
+        var fx = _vfxPool.Get();
+        fx.Fire(position);
+    }
+
+    public void InitializePoolObject(IObjectPool<Gem> pool)
+    {
+        _pool = pool;
+
+        if (_vfxPool == null)
+        {
+            GameObject vfxs = new GameObject("Vfx");
+            _vfxPool = new MonoPool<ExplosionVfx>(explodeVfx, vfxs.transform, 100).Pool;
+        }
     }
 }

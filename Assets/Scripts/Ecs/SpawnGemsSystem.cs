@@ -4,14 +4,20 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Arch.System;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class SpawnGemsSystem : BaseSystem<World, float>
 {
     private QueryDescription _desc = new QueryDescription().WithAll<GridComponent>();
     private QueryDescription _spawnDesc = new QueryDescription().WithAll<GridComponent, SpawnGemsComponent>();
-    public SpawnGemsSystem(World world, Gem gemPrefab, List<GemTypeSO> gemTypes) : base(world) {_gemPrefab = gemPrefab; _gemTypes = gemTypes;}
+    public SpawnGemsSystem(World world, IObjectPool<Gem> gemPool, List<GemTypeSO> gemTypes) : base(world) {
+        _gemPool = gemPool; 
+        _gemTypes = gemTypes;
+        }
 
-    private Gem _gemPrefab;
+    //private Gem _gemPrefab;
+    private IObjectPool<Gem> _gemPool;
+    private IObjectPool<ExplosionVfx> _vfxPool;
     private List<GemTypeSO> _gemTypes;
     private GameObject _parent;
 
@@ -57,7 +63,8 @@ public class SpawnGemsSystem : BaseSystem<World, float>
     
     private void CreateGem(ref GridComponent grid, int x, int y, List<GemTypeSO> gemTypes, Transform parent)
     {        
-        Gem gem = GameObject.Instantiate(_gemPrefab, grid.coordinateConverter.GridToWorldCenter(x, y, grid.cellSize, grid.origin), Quaternion.identity, parent);
+        Gem gem = _gemPool.Get();
+        gem.transform.position = grid.coordinateConverter.GridToWorldCenter(x, y, grid.cellSize, grid.origin);
 
         List<GemTypeSO> forbiddenTypes = new();
         

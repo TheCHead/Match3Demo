@@ -2,7 +2,6 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Arch.System;
 using DG.Tweening;
-using UnityEngine;
 
 public class SwapTilesSystem : BaseSystem<World, float>
 {
@@ -47,7 +46,6 @@ public class SwapTilesSystem : BaseSystem<World, float>
                 swapProcess.sequence.Kill();
                 entity.Remove<SwapTilesProcessComponent>();
                 entity.Add(new MatchGemsComponent());
-                Debug.Log("Swap Process Complete");
             }
         });
     }

@@ -22,7 +22,7 @@ public class InitializeGridSystem : BaseSystem<World, float>
             grid.origin = tilemap.tilemap.origin;
             grid.gridArray = new Entity[grid.width, grid.height];
             grid.mask = GetTilemapMask(tilemap.tilemap);
-            grid.coordinateConverter = new Grid2D<Gem>.VerticalConverter();
+            grid.coordinateConverter = new VerticalConverter();
             grid.tileSelection = new();
         });  
     }

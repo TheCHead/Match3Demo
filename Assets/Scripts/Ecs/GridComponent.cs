@@ -11,7 +11,7 @@ public struct GridComponent
     public Vector3 origin;
     public Entity[,] gridArray;
     public int[,] mask;
-    public Grid2D<Gem>.CoordinateConverter coordinateConverter;
+    public CoordinateConverter coordinateConverter;
 
     public List<Vector2Int> tileSelection;
 

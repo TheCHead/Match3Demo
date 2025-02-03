@@ -11,17 +11,21 @@ public partial class EcsEntry : MonoBehaviour
     [SerializeField] private InputReader inputReader;
     [SerializeField] private List<GemTypeSO> gemTypes;
     private Group<float> _systems;
+    private MonoPool<Gem> _gemPool;
 
     private void Start() 
     {
         var world = World.Create();
         world.Create(new GridComponent(), new TilemapComponent(tilemap));
 
+        GameObject gems = new GameObject("Gems");
+        _gemPool = new MonoPool<Gem>(gemPrefab, gems.transform, tilemap.size.x * tilemap.size.y);
+
         _systems = new Group<float>(
             "Match3",
             new InitializeGridSystem(world),
             new DrawDebugGridSystem(world),
-            new SpawnGemsSystem(world, gemPrefab, gemTypes),
+            new SpawnGemsSystem(world, _gemPool.Pool, gemTypes),
             new InputSystem(world, inputReader),
             new TileSelectionSystem(world),
             new SwapTilesSystem(world),
