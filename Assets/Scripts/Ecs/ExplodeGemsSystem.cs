@@ -11,7 +11,7 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
     private QueryDescription _swapDesc = new QueryDescription().WithAll<GridComponent, ExplodeGemsComponent>();
     public ExplodeGemsSystem(World world) : base(world) {}
 
-    private float _exlodeDelay = 0.1f;
+    private float _explodeDelay = 0.1f;
 
     public override void Update(in float deltaTime)
     {
@@ -22,23 +22,38 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
                 return;
             }
             
-            ExplodeGems(ref grid, explode.gems);
+            ExplodeMatchSet(ref grid, explode.matchSet);
             entity.Remove<ExplodeGemsComponent>();
-            entity.Add(new GemFallComponent(explode.gems.Count * _exlodeDelay + 0.3f));
+            entity.Add(new GemFallComponent(0.5f));
         });
     }
 
  
-    private void ExplodeGems(ref GridComponent grid, List<Vector2Int> matches)
+    private void ExplodeMatchSet(ref GridComponent grid, MatchSet matchSet)
     {
+        foreach (MatchBatch batch in matchSet.batches)
+        {
+            ExplodeBatch(ref grid, batch);
+        }
+    }
+
+    private void ExplodeBatch(ref GridComponent grid, MatchBatch batch)
+    {
+        List<Vector2Int> matches = new List<Vector2Int>(batch.matches);
+
+        Debug.Log($"{matches.Count * 5} x {matches.Count}");
+
         for (int i = 0; i < matches.Count; i++)
         {
+            if (grid.IsEmptyTile(matches[i].x, matches[i].y))
+                continue;
+
             var tile = grid.GetTileValue(matches[i].x, matches[i].y);
 
             if (tile.Has<GemComponent>())
             {
                 Gem gem = tile.Get<GemComponent>().gem;
-                DestroyGemAsync(gem, i * _exlodeDelay);
+                DestroyGemAsync(gem, i * _explodeDelay);
                 tile.Remove<GemComponent>();
             }
 
