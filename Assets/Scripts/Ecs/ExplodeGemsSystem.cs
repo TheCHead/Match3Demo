@@ -41,7 +41,7 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
     {
         List<Vector2Int> matches = new List<Vector2Int>(batch.matches);
 
-        Debug.Log($"{matches.Count * 5} x {matches.Count}");
+        World.Create(new ScoreBatchComponent(batch));
 
         for (int i = 0; i < matches.Count; i++)
         {
@@ -68,5 +68,15 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
         gem.transform.DOPunchScale(Vector3.one * 0.2f, 0.1f, 1);
         await UniTask.Delay(100);
         gem.DestroyGem();
+    }
+}
+
+public struct ScoreBatchComponent
+{
+    public MatchBatch batch;
+
+    public ScoreBatchComponent(MatchBatch batch)
+    {
+        this.batch = batch;
     }
 }

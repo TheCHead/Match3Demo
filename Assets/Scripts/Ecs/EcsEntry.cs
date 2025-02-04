@@ -10,6 +10,7 @@ public partial class EcsEntry : MonoBehaviour
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private InputReader inputReader;
     [SerializeField] private List<GemTypeSO> gemTypes;
+    [SerializeField] private ScoreScreen scoreScreen;
     private Group<float> _systems;
     private MonoPool<Gem> _gemPool;
 
@@ -32,6 +33,7 @@ public partial class EcsEntry : MonoBehaviour
             new MatchGemsSystem(world),
             new ExplodeGemsSystem(world),
             new GemFallSystem(world),
+            new ScoreSystem(world, scoreScreen),
             new UnblockGridSystem(world)
         );
 
