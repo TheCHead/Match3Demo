@@ -5,6 +5,7 @@ using Arch.Core.Extensions;
 using Arch.System;
 using UnityEngine;
 using UnityEngine.Pool;
+using DG.Tweening;
 
 public class SpawnGemsSystem : BaseSystem<World, float>
 {
@@ -65,19 +66,42 @@ public class SpawnGemsSystem : BaseSystem<World, float>
     {        
         Gem gem = _gemPool.Get();
         gem.transform.position = grid.coordinateConverter.GridToWorldCenter(x, y, grid.cellSize, grid.origin);
+        gem.transform.DOScale(Vector3.zero, 0.2f).From().SetDelay(Random.Range(0, 0.2f));
 
-        List<GemTypeSO> forbiddenTypes = new();
+        HashSet<GemTypeSO> forbidden = new();
         
-        if  (grid.IsValidTile(x - 1, y) && !grid.IsEmptyTile(x - 1, y))
+        if  (grid.IsGemTile(x - 2, y) && grid.IsGemTile(x - 1, y) && 
+            grid.GetTileValue(x - 2, y).Get<GemComponent>().gem.GetGemType() == grid.GetTileValue(x - 1, y).Get<GemComponent>().gem.GetGemType())
         {
-            forbiddenTypes.Add(grid.GetTileValue(x - 1, y).Get<GemComponent>().gem.GetGemType());
+            forbidden.Add(grid.GetTileValue(x - 1, y).Get<GemComponent>().gem.GetGemType());
         }
-        if  (grid.IsValidTile(x, y - 1) && !grid.IsEmptyTile(x, y - 1))
+        if  (grid.IsGemTile(x - 1, y) && grid.IsGemTile(x + 1, y) && 
+            grid.GetTileValue(x - 1, y).Get<GemComponent>().gem.GetGemType() == grid.GetTileValue(x + 1, y).Get<GemComponent>().gem.GetGemType())
         {
-            forbiddenTypes.Add(grid.GetTileValue(x, y - 1).Get<GemComponent>().gem.GetGemType());
+            forbidden.Add(grid.GetTileValue(x - 1, y).Get<GemComponent>().gem.GetGemType());
         }
-        GemTypeSO[] allowedTypes = gemTypes.Except(forbiddenTypes).ToArray();
-        gem.SetType(allowedTypes[Random.Range(0, allowedTypes.Length)]);
+        if  (grid.IsGemTile(x + 1, y) && grid.IsGemTile(x + 2, y) && 
+            grid.GetTileValue(x + 1, y).Get<GemComponent>().gem.GetGemType() == grid.GetTileValue(x + 2, y).Get<GemComponent>().gem.GetGemType())
+        {
+            forbidden.Add(grid.GetTileValue(x + 1, y).Get<GemComponent>().gem.GetGemType());
+        }
+        if  (grid.IsGemTile(x, y - 1) && grid.IsGemTile(x, y - 2) &&
+            grid.GetTileValue(x, y - 1).Get<GemComponent>().gem.GetGemType() == grid.GetTileValue(x, y - 2).Get<GemComponent>().gem.GetGemType())
+        {
+            forbidden.Add(grid.GetTileValue(x, y - 1).Get<GemComponent>().gem.GetGemType());
+        }
+
+
+        GemTypeSO[] allowedTypes = gemTypes.Except(forbidden).ToArray();
+        if (allowedTypes.Length > 0)
+        {
+            gem.SetType(allowedTypes[Random.Range(0, allowedTypes.Length)]);
+        }
+
+        else
+        {
+            gem.SetType(gemTypes[Random.Range(0, gemTypes.Count)]);
+        }
 
         var gemEntity = World.Create(new GemComponent(gem), new GridPositionComponent(new Vector2Int(x, y)));
 

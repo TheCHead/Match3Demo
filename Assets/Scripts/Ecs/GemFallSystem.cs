@@ -61,7 +61,7 @@ public class GemFallSystem : BaseSystem<World, float>
                             grid.SetTileValue(x, i, Entity.Null);
                             sequence.Join(
                             gem.Get<GemComponent>().gem.transform
-                                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(x, y, grid.cellSize, grid.origin), 0.75f)
+                                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(x, y, grid.cellSize, grid.origin), 0.6f)
                                 .SetEase(Ease.OutBounce)
                                 .SetDelay(delay));
                             delay += 0.02f;
