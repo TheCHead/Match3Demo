@@ -1,6 +1,8 @@
+using System;
 using Arch.Buffer;
 using Arch.Core;
 using Arch.System;
+using UnityEngine;
 
 public class ScoreSystem : BaseSystem<World, float>
 {
@@ -16,6 +18,8 @@ public class ScoreSystem : BaseSystem<World, float>
         var commandBuffer = new CommandBuffer();
         World.Query(in _scoreDesc, (Entity entity, ref ScoreBatchComponent scoreBatch) => {
             
+            Debug.Log($"Scored {Enum.GetName(typeof(MatchType), scoreBatch.batch.type)}");
+
             float scorePoints = 5f * scoreBatch.batch.matches.Count;
             float scoreMultiplier = scoreBatch.batch.matches.Count;
 

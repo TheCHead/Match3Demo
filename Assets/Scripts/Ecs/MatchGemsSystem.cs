@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Arch.System;
@@ -37,7 +39,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
         // Horizontal
         for (int y = 0; y < grid.height; y++)
         {
-            MatchBatch matchBatch = new(MatchBatch.MatchType.Horizontal);
+            MatchBatch matchBatch = new(MatchType.Horizontal);
 
             for (int x = 0; x < grid.width - 2; x++)
             {
@@ -47,7 +49,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchBatch.MatchType.Horizontal);
+                    matchBatch = new(MatchType.Horizontal);
                     continue;
                 };
 
@@ -67,7 +69,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchBatch.MatchType.Horizontal);
+                    matchBatch = new(MatchType.Horizontal);
                 }
             }
 
@@ -80,7 +82,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
         // Vertical
         for (int x = 0; x < grid.width; x++)
         {
-            MatchBatch matchBatch = new(MatchBatch.MatchType.Vertical);
+            MatchBatch matchBatch = new(MatchType.Vertical);
 
             for (int y = 0; y < grid.height - 2; y++)
             {
@@ -90,7 +92,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchBatch.MatchType.Vertical);
+                    matchBatch = new(MatchType.Vertical);
                     continue;
                 };
 
@@ -110,7 +112,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchBatch.MatchType.Vertical);
+                    matchBatch = new(MatchType.Vertical);
                 }
             }
             if (matchBatch.matches.Count > 0)
@@ -119,9 +121,75 @@ public class MatchGemsSystem : BaseSystem<World, float>
             } 
         }
 
+        // Match patterns
+        MatchSet patternSet = GetPatternMatches(ref grid);
+        matchSet.batches.AddRange(patternSet.batches);
+
         return matchSet;
     }    
+
+    private MatchSet GetPatternMatches(ref GridComponent grid)
+    {
+        MatchSet patternSet = new();
+        patternSet.batches = new();
+
+        var patternKeys = MatchPatterns.Patterns.Keys;
+        bool match;
+
+        for (int y = 0; y < grid.height; y++)
+        {
+            for (int x = 0; x < grid.width; x++)
+            {
+                foreach (var key in patternKeys)
+                {
+                    int[,] pattern = MatchPatterns.Patterns[key];
+                    MatchBatch batch = new MatchBatch(key);
+                    GemTypeSO matchType = null;
+                    match = true;
+                    if (!match)
+                        continue;
+                    for (int c = 0; c < pattern.GetLength(1); c++)
+                    {
+                        if (!match)
+                            break;
+                        for (int r = 0; r < pattern.GetLength(0); r++)
+                        {
+                            if (pattern[r, c] == 1)
+                            {
+                                if (grid.IsGemTile(x + c, y - r))
+                                {
+                                    GemTypeSO gemType = grid.GetTileValue(x + c, y - r).Get<GemComponent>().gem.GetGemType();
+                                    matchType ??= gemType;
+                                    if (matchType != gemType)
+                                    {
+                                        match = false;
+                                        break;
+                                    }
+                                    batch.matches.Add(new Vector2Int(x + c, y - r));
+                                }
+                                else
+                                {
+                                    match = false; 
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (match && batch.matches.Count > 0)
+                    {
+                        patternSet.batches.Add(batch);
+                    }
+                }
+            }
+        }
+        return patternSet;
+    }
 }
+
+
+
+
+public enum MatchType { Horizontal, Vertical, Square, PP };
 
 public struct MatchSet
 {
@@ -130,7 +198,6 @@ public struct MatchSet
 
 public struct MatchBatch
 {
-    public enum MatchType { Horizontal, Vertical};
     public HashSet<Vector2Int> matches;
     public MatchType type;
 
@@ -141,5 +208,29 @@ public struct MatchBatch
     }
 }
 
+
+public static class MatchPatterns
+{
+    public static readonly Dictionary<MatchType, int[,]> Patterns;
+
+    static MatchPatterns()
+    {
+        Patterns = new Dictionary<MatchType, int[,]>()
+        {
+            {MatchType.Square, new int[2,2]
+            {
+                { 1, 1 },
+                { 1, 1 }
+            }}
+            ,
+            {MatchType.PP, new int[3,3]
+            {
+                { 0, 1, 0},
+                { 0, 1, 0},
+                { 1, 1, 1}
+            }}
+        };
+    }
+}
 
 
