@@ -41,7 +41,7 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
     {
         List<Vector2Int> matches = new List<Vector2Int>(batch.matches);
 
-        World.Create(new ScoreBatchComponent(batch));
+        //World.Create(new ScoreBatchComponent(batch));
 
         for (int i = 0; i < matches.Count; i++)
         {
@@ -71,12 +71,12 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
     }
 }
 
-public struct ScoreBatchComponent
-{
-    public MatchBatch batch;
+// public struct ScoreBatchComponent
+// {
+//     public MatchBatch batch;
 
-    public ScoreBatchComponent(MatchBatch batch)
-    {
-        this.batch = batch;
-    }
-}
+//     public ScoreBatchComponent(MatchBatch batch)
+//     {
+//         this.batch = batch;
+//     }
+// }

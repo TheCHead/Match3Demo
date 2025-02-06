@@ -19,8 +19,21 @@ public class TileSelectionSystem : BaseSystem<World, float>
                 {
                     entity.Add(new SwapTilesComponent(tileA, tileB), new BlockedComponent());
                 }
+                
+                DeselectGridTiles(ref grid);
                 grid.tileSelection.Clear();
             }
         });  
+    }
+
+    private void DeselectGridTiles(ref GridComponent grid)
+    {
+        foreach (var tile in grid.tileSelection)
+        {
+            if (grid.IsGemTile(tile))
+            {
+                grid.GetTileValue(tile).Get<GemComponent>().gem.Deselect();
+            }
+        }
     }
 }

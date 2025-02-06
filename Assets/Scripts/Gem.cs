@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -9,6 +10,9 @@ public class Gem : MonoBehaviour, IPoolObject<Gem>
     private IObjectPool<Gem> _pool;
     private static IObjectPool<ExplosionVfx> _vfxPool;
 
+    private bool _selected;
+    private Tween _selectTween;
+
     public void SetType(GemTypeSO type)
     {
         _type = type;
@@ -16,6 +20,29 @@ public class Gem : MonoBehaviour, IPoolObject<Gem>
     }
 
     public GemTypeSO GetGemType() => _type;
+
+    public void Select()
+    {
+        if (_selected)
+            return;
+
+        _selected = true;
+        _selectTween = transform.DOScale(Vector3.one * 1.1f, 0.3f).SetLoops(-1, LoopType.Yoyo);
+    }
+
+    public void Deselect()
+    {
+        if (!_selected)
+            return;
+        _selected = false;
+        _selectTween.Kill();
+        transform.localScale = Vector3.one;
+    }
+
+    public void Highlight()
+    {
+        transform.DOScale(Vector3.one * 1.1f, 0.2f).SetLoops(2, LoopType.Yoyo);
+    }
 
     public void DestroyGem()
     {

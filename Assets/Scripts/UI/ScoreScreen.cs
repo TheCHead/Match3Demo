@@ -18,14 +18,17 @@ public class ScoreScreen : MonoBehaviour
         scoreLabel.text = $"{_score} x {_mult} = {_score * _mult}";
     }
 
-    public void Finalize()
+    public void UpdateTotal()
     {
         float finalScore = _score * _mult;
         _total += finalScore;
         totalLabel.text = _total.ToString();
+        //scoreLabel.text = $"0 x 0";
+    }
 
+    public void Reset()
+    {
         _score = 0;
         _mult = 0;
-        scoreLabel.text = $"0 x 0";
     }
 }

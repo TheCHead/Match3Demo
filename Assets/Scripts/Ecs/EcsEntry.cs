@@ -31,9 +31,9 @@ public partial class EcsEntry : MonoBehaviour
             new TileSelectionSystem(world),
             new SwapTilesSystem(world),
             new MatchGemsSystem(world),
+            new ScoreSystem(world, scoreScreen),
             new ExplodeGemsSystem(world),
             new GemFallSystem(world),
-            new ScoreSystem(world, scoreScreen),
             new UnblockGridSystem(world)
         );
 

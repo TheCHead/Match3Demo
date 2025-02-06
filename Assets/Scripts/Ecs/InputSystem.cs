@@ -1,4 +1,5 @@
 using Arch.Core;
+using Arch.Core.Extensions;
 using Arch.System;
 using UnityEngine;
 
@@ -18,9 +19,10 @@ public class InputSystem : BaseSystem<World, float>
             {
                 var gridPos = grid.coordinateConverter.WorldToGrid(Camera.main.ScreenToWorldPoint(_inputReader.Selected), grid.cellSize, grid.origin);
 
-                if (grid.IsObjectTile(gridPos.x, gridPos.y))
+                if (grid.IsGemTile(gridPos))
                 {
                     grid.tileSelection.Add(gridPos);
+                    grid.GetTileValue(gridPos).Get<GemComponent>().gem.Select();
                 }
             }
         });  

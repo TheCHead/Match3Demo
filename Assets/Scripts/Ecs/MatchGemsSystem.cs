@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Arch.System;
 using UnityEngine;
+using static MatchPatterns;
 
 public class MatchGemsSystem : BaseSystem<World, float>
 {
@@ -20,13 +19,14 @@ public class MatchGemsSystem : BaseSystem<World, float>
 
             if (matchSet.batches.Count > 0)
             {
-                entity.Add(new ExplodeGemsComponent(matchSet, 0.1f));
+                entity.Add(new ScoreMatchSetComponent(matchSet));
             }
             else
             {
-                World.Create(new FinalizeScoreComponent());
+                entity.Add(new ResetScoreComponent());
                 entity.Add(new SpawnGemsComponent(0.5f));
             }
+
             entity.Remove<MatchGemsComponent>();
         });
     }
@@ -186,11 +186,6 @@ public class MatchGemsSystem : BaseSystem<World, float>
     }
 }
 
-
-
-
-public enum MatchType { Horizontal, Vertical, Square, PP };
-
 public struct MatchSet
 {
     public List<MatchBatch> batches;
@@ -207,30 +202,3 @@ public struct MatchBatch
         matches = new();
     }
 }
-
-
-public static class MatchPatterns
-{
-    public static readonly Dictionary<MatchType, int[,]> Patterns;
-
-    static MatchPatterns()
-    {
-        Patterns = new Dictionary<MatchType, int[,]>()
-        {
-            {MatchType.Square, new int[2,2]
-            {
-                { 1, 1 },
-                { 1, 1 }
-            }}
-            ,
-            {MatchType.PP, new int[3,3]
-            {
-                { 0, 1, 0},
-                { 0, 1, 0},
-                { 1, 1, 1}
-            }}
-        };
-    }
-}
-
-
