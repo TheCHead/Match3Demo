@@ -24,7 +24,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
             else
             {
                 entity.Add(new ResetScoreComponent());
-                entity.Add(new SpawnGemsComponent(0.5f));
+                entity.Add(new SpawnGemsComponent(0.3f));
             }
 
             entity.Remove<MatchGemsComponent>();

@@ -24,7 +24,7 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
             
             ExplodeMatchSet(ref grid, explode.matchSet);
             entity.Remove<ExplodeGemsComponent>();
-            entity.Add(new GemFallComponent(0.5f));
+            entity.Add(new GemFallComponent(0.3f));
         });
     }
 

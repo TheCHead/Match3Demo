@@ -12,6 +12,7 @@ public class Gem : MonoBehaviour, IPoolObject<Gem>
 
     private bool _selected;
     private Tween _selectTween;
+    private Tween _highlightTween;
 
     public void SetType(GemTypeSO type)
     {
@@ -39,9 +40,11 @@ public class Gem : MonoBehaviour, IPoolObject<Gem>
         transform.localScale = Vector3.one;
     }
 
-    public void Highlight()
+    public void Highlight(float time)
     {
-        transform.DOScale(Vector3.one * 1.1f, 0.2f).SetLoops(2, LoopType.Yoyo);
+        _highlightTween.Kill();
+        transform.localScale = Vector3.one;
+        _highlightTween = transform.DOScale(Vector3.one * 1.1f, time * 0.5f).SetLoops(2, LoopType.Yoyo);
     }
 
     public void DestroyGem()

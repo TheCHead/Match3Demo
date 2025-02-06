@@ -31,7 +31,7 @@ public class ScoreSystem : BaseSystem<World, float>
 
     private async void ScoreMatchSetAsync(Entity entity, MatchSet set)
     {
-        int delay = 500;
+        int delay = 400;
         foreach (var batch in set.batches)
         {
             Debug.Log($"Scored {Enum.GetName(typeof(MatchType), batch.type)}");
@@ -67,7 +67,7 @@ public class ScoreSystem : BaseSystem<World, float>
             {
                 foreach (var match in batch.matches)
                 {
-                    entity.Get<GridComponent>().GetTileValue(match).Get<GemComponent>().gem.Highlight();
+                    entity.Get<GridComponent>().GetTileValue(match).Get<GemComponent>().gem.Highlight(delay * 0.001f);
                 }
             }
 
@@ -75,11 +75,11 @@ public class ScoreSystem : BaseSystem<World, float>
             await UniTask.Delay(delay);
             delay = Mathf.RoundToInt(delay * 0.9f);
         }
-        await UniTask.Delay(200);
+        await UniTask.Delay(300);
 
         _screen.UpdateTotal();
         entity.Remove<ScoreProcessComponent>();
-        entity.Add(new ExplodeGemsComponent(set, 0.5f));
+        entity.Add(new ExplodeGemsComponent(set, 0f));
     }
 }
 

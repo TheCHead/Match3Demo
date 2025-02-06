@@ -25,11 +25,11 @@ public class SwapTilesSystem : BaseSystem<World, float>
                 swapSequence.SetAutoKill(false);
 
                 swapSequence.Append(tileA.Get<GemComponent>().gem.transform
-                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(swap.tileB.x, swap.tileB.y, grid.cellSize, grid.origin), 0.5f)
+                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(swap.tileB.x, swap.tileB.y, grid.cellSize, grid.origin), 0.3f)
                 .SetEase(Ease.InSine));
 
                 swapSequence.Join(tileB.Get<GemComponent>().gem.transform
-                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(swap.tileA.x, swap.tileA.y, grid.cellSize, grid.origin), 0.5f)
+                .DOLocalMove(grid.coordinateConverter.GridToWorldCenter(swap.tileA.x, swap.tileA.y, grid.cellSize, grid.origin), 0.3f)
                 .SetEase(Ease.InSine));
 
                 entity.Add(new SwapTilesProcessComponent(swapSequence));

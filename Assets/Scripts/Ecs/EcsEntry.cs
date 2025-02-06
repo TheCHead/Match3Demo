@@ -16,6 +16,8 @@ public partial class EcsEntry : MonoBehaviour
 
     private void Start() 
     {
+        Application.targetFrameRate = 60;
+
         var world = World.Create();
         world.Create(new GridComponent(), new TilemapComponent(tilemap));
 
