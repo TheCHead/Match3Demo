@@ -25,7 +25,7 @@ public class TriggerDispatchSystem : BaseSystem<World, float>
             entity.Add(new TriggerGemBatchComponent(batch, triggerTime));
 
             await UniTask.WaitForSeconds(triggerTime);
-            triggerTime *= 0.95f;
+            triggerTime *= 0.9f;
 
             foreach (var item in PassiveItems.Items)
             {
