@@ -59,6 +59,7 @@ public class SpawnGemsSystem : BaseSystem<World, float>
             }
             
             entity.Remove<SpawnGemsComponent>();
+            entity.Remove<BlockedComponent>();
         });
     }
     

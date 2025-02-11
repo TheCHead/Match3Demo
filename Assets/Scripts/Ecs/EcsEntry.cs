@@ -24,6 +24,8 @@ public partial class EcsEntry : MonoBehaviour
         GameObject gems = new GameObject("Gems");
         _gemPool = new MonoPool<Gem>(gemPrefab, gems.transform, tilemap.size.x * tilemap.size.y);
 
+        PassiveItems.Items.Add(new SquarePeg());
+
         _systems = new Group<float>(
             "Match3",
             new InitializeGridSystem(world),
@@ -33,6 +35,8 @@ public partial class EcsEntry : MonoBehaviour
             new TileSelectionSystem(world),
             new SwapTilesSystem(world),
             new MatchGemsSystem(world),
+            new TriggerDispatchSystem(world),
+            new TriggerGemsSystem(world),
             new ScoreSystem(world, scoreScreen),
             new ExplodeGemsSystem(world),
             new GemFallSystem(world),

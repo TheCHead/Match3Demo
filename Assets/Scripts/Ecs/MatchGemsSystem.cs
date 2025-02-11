@@ -19,7 +19,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
 
             if (matchSet.batches.Count > 0)
             {
-                entity.Add(new ScoreMatchSetComponent(matchSet));
+                entity.Add(new TriggerGemsComponent(matchSet));
             }
             else
             {
@@ -122,28 +122,38 @@ public class MatchGemsSystem : BaseSystem<World, float>
         }
 
         // Match patterns
-        MatchSet patternSet = GetPatternMatches(ref grid);
+        List<MatchType> patternTypes = new();
+
+        foreach (var item in PassiveItems.Items)
+        {
+            if (item.TryGetMatchType(out MatchType type))
+            {
+                patternTypes.Add(type);
+            }
+        }
+
+        MatchSet patternSet = GetPatternMatches(ref grid, patternTypes);
         matchSet.batches.AddRange(patternSet.batches);
 
         return matchSet;
     }    
 
-    private MatchSet GetPatternMatches(ref GridComponent grid)
+    private MatchSet GetPatternMatches(ref GridComponent grid, List<MatchType> types)
     {
         MatchSet patternSet = new();
         patternSet.batches = new();
 
-        var patternKeys = MatchPatterns.Patterns.Keys;
+        //var patternKeys = MatchPatterns.Patterns.Keys;
         bool match;
 
         for (int y = 0; y < grid.height; y++)
         {
             for (int x = 0; x < grid.width; x++)
             {
-                foreach (var key in patternKeys)
+                foreach (var type in types)
                 {
-                    int[,] pattern = MatchPatterns.Patterns[key];
-                    MatchBatch batch = new MatchBatch(key);
+                    int[,] pattern = MatchPatterns.Patterns[type];
+                    MatchBatch batch = new MatchBatch(type);
                     GemTypeSO matchType = null;
                     match = true;
                     if (!match)
