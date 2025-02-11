@@ -25,6 +25,7 @@ public partial class EcsEntry : MonoBehaviour
         _gemPool = new MonoPool<Gem>(gemPrefab, gems.transform, tilemap.size.x * tilemap.size.y);
 
         PassiveItems.Items.Add(new SquarePeg());
+        PassiveItems.Items.Add(new Clover());
 
         _systems = new Group<float>(
             "Match3",

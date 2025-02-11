@@ -37,6 +37,9 @@ public class ScoreSystem : BaseSystem<World, float>
         float mult = 0;
         switch  (batch.type)
         {
+            case MatchType.None:
+                points = 3f * batch.matches.Count;
+                break;
             case MatchType.Horizontal:
             case MatchType.Vertical:
                 points = 3f * batch.matches.Count;

@@ -15,6 +15,7 @@ public class TriggerGemsSystem : BaseSystem<World, float>
                 grid.GetTileValue(match).Get<GemComponent>().gem.Highlight(gemBatchComponent.timeframe);
                 entity.Remove<TriggerGemBatchComponent>();
             }
+            entity.Add(new QueueExplosionComponent(gemBatchComponent.batch));
             World.Create(new ScoreBatchComponent(gemBatchComponent.batch));
         });
     }

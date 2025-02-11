@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public static class MatchPatterns
 {
-    public enum MatchType { Horizontal, Vertical, Square, Clover, Tower, Holy };
+    public enum MatchType { None, Horizontal, Vertical, Square, Clover, Tower, Holy };
     public static readonly Dictionary<MatchType, int[,]> Patterns = new Dictionary<MatchType, int[,]>()
     {
         {MatchType.Square, new int[2,2]

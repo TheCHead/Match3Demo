@@ -8,40 +8,40 @@ using Cysharp.Threading.Tasks;
 
 public class ExplodeGemsSystem : BaseSystem<World, float>
 {
-    private QueryDescription _swapDesc = new QueryDescription().WithAll<GridComponent, ExplodeGemsComponent>();
+    private QueryDescription _queueDesc = new QueryDescription().WithAll<GridComponent, QueueExplosionComponent>();
+    private QueryDescription _explodeDesc = new QueryDescription().WithAll<GridComponent, ExplodeGemsComponent>();
     public ExplodeGemsSystem(World world) : base(world) {}
 
     private float _explodeDelay = 0.1f;
+    private Queue<MatchBatch> _explosionQueue = new();
 
     public override void Update(in float deltaTime)
     {
-        World.Query(in _swapDesc, (Entity entity, ref GridComponent grid, ref ExplodeGemsComponent explode) => {
+        World.Query(in _queueDesc, (Entity entity, ref QueueExplosionComponent explosion) => {            
+            _explosionQueue.Enqueue(explosion.batch);
+            entity.Remove<QueueExplosionComponent>();
+        });
+
+        World.Query(in _explodeDesc, (Entity entity, ref GridComponent grid, ref ExplodeGemsComponent explode) => {
             if (explode.delayCounter < explode.delay)
             {
                 explode.delayCounter += Time.deltaTime;
                 return;
             }
             
-            ExplodeMatchSet(ref grid, explode.matchSet);
+            foreach (var batch in _explosionQueue)
+            {
+                ExplodeBatch(ref grid, batch);
+            }
+            _explosionQueue.Clear();
             entity.Remove<ExplodeGemsComponent>();
             entity.Add(new GemFallComponent(0.3f));
         });
     }
 
- 
-    private void ExplodeMatchSet(ref GridComponent grid, MatchSet matchSet)
-    {
-        foreach (MatchBatch batch in matchSet.batches)
-        {
-            ExplodeBatch(ref grid, batch);
-        }
-    }
-
     private void ExplodeBatch(ref GridComponent grid, MatchBatch batch)
     {
         List<Vector2Int> matches = new List<Vector2Int>(batch.matches);
-
-        //World.Create(new ScoreBatchComponent(batch));
 
         for (int i = 0; i < matches.Count; i++)
         {
@@ -71,12 +71,12 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
     }
 }
 
-// public struct ScoreBatchComponent
-// {
-//     public MatchBatch batch;
+public struct QueueExplosionComponent
+{
+    public MatchBatch batch;
 
-//     public ScoreBatchComponent(MatchBatch batch)
-//     {
-//         this.batch = batch;
-//     }
-// }
+    public QueueExplosionComponent(MatchBatch batch)
+    {
+        this.batch = batch;
+    }
+}

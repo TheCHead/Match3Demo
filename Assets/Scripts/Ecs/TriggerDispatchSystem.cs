@@ -34,7 +34,7 @@ public class TriggerDispatchSystem : BaseSystem<World, float>
         }
 
         entity.Remove<TriggerDispatchProcessComponent>();
-        entity.Add(new ExplodeGemsComponent(set, 0f));
+        entity.Add(new ExplodeGemsComponent(0f));
     }
 }
 
