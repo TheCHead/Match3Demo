@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Cysharp.Threading.Tasks;
@@ -13,6 +14,11 @@ public static class PassiveItems
 
 public class SquarePeg : IPassiveItem
 {
+    public async UniTask OnExplodeBatch(Entity entity, MatchBatch batch)
+    {
+        await UniTask.WaitForEndOfFrame();
+    }
+
     public async UniTask OnTriggerBatch(Entity entity, MatchBatch batch, float triggerTime)
     {
         // retrigger square batch
@@ -40,7 +46,7 @@ public class Clover : IPassiveItem
             if (entity.Has<GridComponent>())
             {
                 var grid = entity.Get<GridComponent>();
-                MatchBatch newBatch = new MatchBatch(MatchType.None, GemType.Unknown);
+                MatchBatch newBatch = new MatchBatch(MatchType.None, null);
                 Vector2Int top = batch.matches.OrderByDescending(match => match.y).First();
                 Vector2Int center = top + Vector2Int.down;
 
@@ -89,6 +95,11 @@ public class Clover : IPassiveItem
         }
     }
 
+    public async UniTask OnExplodeBatch(Entity entity, MatchBatch batch)
+    {
+        await UniTask.WaitForEndOfFrame();
+    }
+
     public bool TryGetMatchType(out MatchType matchType)
     {
         matchType = MatchType.Clover;
@@ -113,7 +124,7 @@ public class Tower : IPassiveItem
                     for (int y = 0; y < grid.height; y++)
                     {
                         Vector2Int tile = new Vector2Int(x, y);
-                        if (grid.IsGemTile(tile) && !batch.matches.Contains(tile) && grid.GetTileValue(tile).Get<GemComponent>().gem.GetGemType().gemType == batch.gemType)
+                        if (grid.IsGemTile(tile) && !batch.matches.Contains(tile) && grid.GetTileValue(tile).Get<GemComponent>().gem.GetGemType() == batch.gemType)
                         {
                             newBatch.matches.Add(tile);
                         }
@@ -129,9 +140,58 @@ public class Tower : IPassiveItem
         }
     }
 
+    public async UniTask OnExplodeBatch(Entity entity, MatchBatch batch)
+    {
+        await UniTask.WaitForEndOfFrame();
+    }
+
     public bool TryGetMatchType(out MatchType matchType)
     {
         matchType = MatchType.Tower;
+        return true;
+    }
+}
+
+public class Holy : IPassiveItem
+{
+    public async UniTask OnExplodeBatch(Entity gridEntity, MatchBatch batch)
+    {
+        if (batch.type == MatchType.Holy)
+        {
+            var grid = gridEntity.Get<GridComponent>();
+
+            foreach (var match in batch.matches)
+            {
+                if (grid.TryGetGemValue(match + Vector2Int.left, out Gem gemL))
+                {
+                    gemL.SetType(batch.gemType);
+                }
+                if (grid.TryGetGemValue(match + Vector2Int.up, out Gem gemU))
+                {
+                    gemU.SetType(batch.gemType);
+                }
+                if (grid.TryGetGemValue(match + Vector2Int.right, out Gem gemR))
+                {
+                    gemR.SetType(batch.gemType);
+                }
+                if (grid.TryGetGemValue(match + Vector2Int.down, out Gem gemD))
+                {
+                    gemD.SetType(batch.gemType);
+                }
+
+                await UniTask.WaitForSeconds(0.1f);
+            }
+        }
+    }
+
+    public async UniTask OnTriggerBatch(Entity entity, MatchBatch batch, float triggerTime)
+    {
+        await UniTask.WaitForEndOfFrame();
+    }
+
+    public bool TryGetMatchType(out MatchType matchType)
+    {
+        matchType = MatchType.Holy;
         return true;
     }
 }
@@ -140,4 +200,5 @@ public interface IPassiveItem
 {
     public bool TryGetMatchType(out MatchType matchType);
     public UniTask OnTriggerBatch(Entity entity, MatchBatch batch, float triggerTime);
+    public UniTask OnExplodeBatch(Entity entity, MatchBatch batch);
 }

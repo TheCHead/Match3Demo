@@ -31,7 +31,7 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
             
             foreach (var batch in _explosionQueue)
             {
-                ExplodeBatch(ref grid, batch);
+                ExplodeBatch(entity, batch);
             }
             _explosionQueue.Clear();
             entity.Remove<ExplodeGemsComponent>();
@@ -39,9 +39,15 @@ public class ExplodeGemsSystem : BaseSystem<World, float>
         });
     }
 
-    private void ExplodeBatch(ref GridComponent grid, MatchBatch batch)
+    private void ExplodeBatch(Entity gridEnity, MatchBatch batch)
     {
         List<Vector2Int> matches = new List<Vector2Int>(batch.matches);
+        var grid = gridEnity.Get<GridComponent>();
+
+        foreach (var item in PassiveItems.Items)
+        {
+            item.OnExplodeBatch(gridEnity, batch);
+        }
 
         for (int i = 0; i < matches.Count; i++)
         {

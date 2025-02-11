@@ -36,4 +36,9 @@ public struct GridComponent
     public bool IsObjectTile(int x, int y) => IsValidTile(x, y) && gridArray[x, y] != null && gridArray[x, y] != Entity.Null && gridArray[x, y] != default;
     public bool IsGemTile(int x, int y) => IsObjectTile(x, y) && gridArray[x, y].Has<GemComponent>();
     public bool IsGemTile(Vector2Int gridPos) => IsGemTile(gridPos.x, gridPos.y);
+    public bool TryGetGemValue(Vector2Int gridPos, out Gem gem)
+    {
+        gem = IsGemTile(gridPos) ? GetTileValue(gridPos).Get<GemComponent>().gem : null;
+        return gem != null;
+    }
 }
