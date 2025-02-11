@@ -15,6 +15,7 @@ public class SquarePeg : IPassiveItem
 {
     public async UniTask OnTriggerBatch(Entity entity, MatchBatch batch, float triggerTime)
     {
+        // retrigger square batch
         if (batch.type == MatchType.Square)
         {
             entity.Add(new TriggerGemBatchComponent(batch, triggerTime));
@@ -33,13 +34,13 @@ public class Clover : IPassiveItem
 {
     public async UniTask OnTriggerBatch(Entity entity, MatchBatch batch, float triggerTime)
     {
+        // trigger all tiles horizontally and vertically from clover center
         if (batch.type == MatchType.Clover)
         {
-            // make new batch and trigger it
             if (entity.Has<GridComponent>())
             {
                 var grid = entity.Get<GridComponent>();
-                MatchBatch newBatch = new MatchBatch(MatchType.None);
+                MatchBatch newBatch = new MatchBatch(MatchType.None, GemType.Unknown);
                 Vector2Int top = batch.matches.OrderByDescending(match => match.y).First();
                 Vector2Int center = top + Vector2Int.down;
 
@@ -91,6 +92,46 @@ public class Clover : IPassiveItem
     public bool TryGetMatchType(out MatchType matchType)
     {
         matchType = MatchType.Clover;
+        return true;
+    }
+}
+
+public class Tower : IPassiveItem
+{
+    public async UniTask OnTriggerBatch(Entity entity, MatchBatch batch, float triggerTime)
+    {
+        // trigger all tiles of the same type
+        if (batch.type == MatchType.Tower)
+        {
+            if (entity.Has<GridComponent>())
+            {
+                var grid = entity.Get<GridComponent>();
+                MatchBatch newBatch = new MatchBatch(MatchType.None, batch.gemType);
+
+                for (int x = 0; x < grid.width; x++)
+                {
+                    for (int y = 0; y < grid.height; y++)
+                    {
+                        Vector2Int tile = new Vector2Int(x, y);
+                        if (grid.IsGemTile(tile) && !batch.matches.Contains(tile) && grid.GetTileValue(tile).Get<GemComponent>().gem.GetGemType().gemType == batch.gemType)
+                        {
+                            newBatch.matches.Add(tile);
+                        }
+                    }
+                }
+
+                if (newBatch.matches.Count > 0)
+                {
+                    entity.Add(new TriggerGemBatchComponent(newBatch, triggerTime));
+                    await UniTask.WaitForSeconds(triggerTime); 
+                }
+            }
+        }
+    }
+
+    public bool TryGetMatchType(out MatchType matchType)
+    {
+        matchType = MatchType.Tower;
         return true;
     }
 }

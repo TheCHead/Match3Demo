@@ -39,7 +39,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
         // Horizontal
         for (int y = 0; y < grid.height; y++)
         {
-            MatchBatch matchBatch = new(MatchType.Horizontal);
+            MatchBatch matchBatch = new(MatchType.Horizontal, GemType.Unknown);
 
             for (int x = 0; x < grid.width - 2; x++)
             {
@@ -49,7 +49,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchType.Horizontal);
+                    matchBatch = new(MatchType.Horizontal, GemType.Unknown);
                     continue;
                 };
 
@@ -57,11 +57,12 @@ public class MatchGemsSystem : BaseSystem<World, float>
                 var gemB = grid.GetTileValue(x + 1, y);
                 var gemC = grid.GetTileValue(x + 2, y);
 
-                if (gemA.Get<GemComponent>().gem.GetGemType() == gemB.Get<GemComponent>().gem.GetGemType() && gemB.Get<GemComponent>().gem.GetGemType() == gemC.Get<GemComponent>().gem.GetGemType())
+                if (gemA.Get<GemComponent>().gem.GetGemType().gemType == gemB.Get<GemComponent>().gem.GetGemType().gemType && gemB.Get<GemComponent>().gem.GetGemType().gemType == gemC.Get<GemComponent>().gem.GetGemType().gemType)
                 {
                     matchBatch.matches.Add(new Vector2Int(x, y));
                     matchBatch.matches.Add(new Vector2Int(x + 1, y));
                     matchBatch.matches.Add(new Vector2Int(x + 2, y));
+                    matchBatch.gemType = gemA.Get<GemComponent>().gem.GetGemType().gemType;
                 }
                 else
                 {
@@ -69,7 +70,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchType.Horizontal);
+                    matchBatch = new(MatchType.Horizontal, GemType.Unknown);
                 }
             }
 
@@ -82,7 +83,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
         // Vertical
         for (int x = 0; x < grid.width; x++)
         {
-            MatchBatch matchBatch = new(MatchType.Vertical);
+            MatchBatch matchBatch = new(MatchType.Vertical, GemType.Unknown);
 
             for (int y = 0; y < grid.height - 2; y++)
             {
@@ -92,7 +93,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchType.Vertical);
+                    matchBatch = new(MatchType.Vertical, GemType.Unknown);
                     continue;
                 };
 
@@ -105,6 +106,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     matchBatch.matches.Add(new Vector2Int(x, y));
                     matchBatch.matches.Add(new Vector2Int(x, y + 1));
                     matchBatch.matches.Add(new Vector2Int(x, y + 2));
+                    matchBatch.gemType = gemA.Get<GemComponent>().gem.GetGemType().gemType;
                 }
                 else
                 {
@@ -112,7 +114,7 @@ public class MatchGemsSystem : BaseSystem<World, float>
                     {
                         matchSet.batches.Add(matchBatch);
                     }
-                    matchBatch = new(MatchType.Vertical);
+                    matchBatch = new(MatchType.Vertical, GemType.Unknown);
                 }
             }
             if (matchBatch.matches.Count > 0)
@@ -153,8 +155,9 @@ public class MatchGemsSystem : BaseSystem<World, float>
                 foreach (var type in types)
                 {
                     int[,] pattern = MatchPatterns.Patterns[type];
-                    MatchBatch batch = new MatchBatch(type);
-                    GemTypeSO matchType = null;
+                    MatchBatch batch = new MatchBatch(type, GemType.Unknown);
+                    //GemTypeSO matchType = null;
+                    GemType matchType = GemType.Unknown;
                     match = true;
                     if (!match)
                         continue;
@@ -168,14 +171,16 @@ public class MatchGemsSystem : BaseSystem<World, float>
                             {
                                 if (grid.IsGemTile(x + c, y - r))
                                 {
-                                    GemTypeSO gemType = grid.GetTileValue(x + c, y - r).Get<GemComponent>().gem.GetGemType();
-                                    matchType ??= gemType;
+                                    GemType gemType = grid.GetTileValue(x + c, y - r).Get<GemComponent>().gem.GetGemType().gemType;
+                                    //matchType ??= gemType;
+                                    matchType = matchType == GemType.Unknown ? gemType : matchType;
                                     if (matchType != gemType)
                                     {
                                         match = false;
                                         break;
                                     }
                                     batch.matches.Add(new Vector2Int(x + c, y - r));
+                                    batch.gemType = matchType;
                                 }
                                 else
                                 {
@@ -204,11 +209,13 @@ public struct MatchSet
 public struct MatchBatch
 {
     public HashSet<Vector2Int> matches;
+    public GemType gemType;
     public MatchType type;
 
-    public MatchBatch(MatchType type)
+    public MatchBatch(MatchType type, GemType gemType)
     {
         this.type = type;
+        this.gemType = gemType;
         matches = new();
     }
 }

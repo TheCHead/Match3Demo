@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b96159ef52154bb59de2e821bc14356, type: 3}
   m_Name: Yellow
   m_EditorClassIdentifier: 
+  gemType: 4
   sprite: {fileID: 581544341, guid: 681e7e53eb6b2464796a3b703bbcd396, type: 3}

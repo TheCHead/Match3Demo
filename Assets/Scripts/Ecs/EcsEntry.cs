@@ -26,6 +26,7 @@ public partial class EcsEntry : MonoBehaviour
 
         PassiveItems.Items.Add(new SquarePeg());
         PassiveItems.Items.Add(new Clover());
+        PassiveItems.Items.Add(new Tower());
 
         _systems = new Group<float>(
             "Match3",
