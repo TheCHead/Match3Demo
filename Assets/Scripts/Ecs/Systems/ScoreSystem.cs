@@ -34,7 +34,6 @@ namespace Scripts.Ecs.Systems
             World.Query(in _finilizeDesc, (Entity entity, ref GridComponent grid, ref ResetScoreComponent finalize) =>
             {
                 _scorePresenter.UpdateTotal();
-                _scorePresenter.Reset();
                 entity.Remove<ResetScoreComponent>();
             });
 
@@ -73,7 +72,7 @@ namespace Scripts.Ecs.Systems
                     break;
             }
 
-            _scorePresenter.AddScore(points, mult);
+            _scorePresenter.OnScore(points, mult);
         }
     }
 }

@@ -20,26 +20,26 @@ namespace Scripts.UI.Presenters
             Debug.Log("Score Initialized");
         }
 
-        public void AddScore(float score, float mult)
+        public void OnScore(float score, float mult)
         {
-            _view.AddScore(score, mult);
+            _model.AddScore(score, mult);
+            _view.UpdateScore(_model.GetScore(), _model.GetMultiplier());
         }
 
         public void UpdateTotal()
         {
-            _view.UpdateTotal();
-        }
+            float fromTotal = _model.GetTotal();
+            _model.UpdateTotal();
 
-        public void Reset()
-        {
-            _view.Reset();
+            _view.ResetScore(_model.GetScoreXMult());
+            _view.UpdateTotal(fromTotal, _model.GetTotal());
+            _model.SoftReset();
         }
     }
 
     public interface IScorePresenter : IPresenter
     {
-        public void AddScore(float score, float mult);
+        public void OnScore(float score, float mult);
         public void UpdateTotal();
-        public void Reset();
     }
 }

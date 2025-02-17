@@ -29,7 +29,6 @@ namespace Scripts.UI
                 return; // Screen is already active
 
             IPresenter presenter = _presenterFactory.GetPresenter(screen);
-            presenter.Initialize();
 
             _activePresenters[screen] = presenter;
         }
