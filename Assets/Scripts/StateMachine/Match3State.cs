@@ -11,6 +11,7 @@ namespace Scripts.StateMachine
         {
             Debug.Log("Enter Match3Game");
             // TODO extract loading to SceneLoading service
+            // Init score presenter
             SceneManager.LoadScene("Match3");
             await UniTask.NextFrame();
         }

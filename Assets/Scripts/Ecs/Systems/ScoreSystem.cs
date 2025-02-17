@@ -4,6 +4,8 @@ using Arch.Core.Extensions;
 using Arch.System;
 using Scripts.DataModels;
 using Scripts.Ecs.Components;
+using Scripts.UI;
+using Scripts.UI.Presenters;
 using static MatchPatterns;
 
 namespace Scripts.Ecs.Systems
@@ -11,12 +13,14 @@ namespace Scripts.Ecs.Systems
     public class ScoreSystem : BaseSystem<World, float>
     {
         private QueryDescription _scoreBatchDesc = new QueryDescription().WithAll<ScoreBatchComponent>();
-
         private QueryDescription _finilizeDesc = new QueryDescription().WithAll<GridComponent, ResetScoreComponent>();
-
-        public ScoreSystem(World world, ScoreScreen screen) : base(world) { _screen = screen; }
-
-        private ScoreScreen _screen;
+        private IScorePresenter _scorePresenter;
+        private UIService _uiService;
+        public ScoreSystem(World world, UIService uIService) : base(world) 
+        { 
+            _uiService = uIService;
+            _scorePresenter = _uiService.GetPresenter(EUIScreen.Score) as IScorePresenter;
+        }
 
         public override void Update(in float deltaTime)
         {
@@ -29,8 +33,8 @@ namespace Scripts.Ecs.Systems
 
             World.Query(in _finilizeDesc, (Entity entity, ref GridComponent grid, ref ResetScoreComponent finalize) =>
             {
-                _screen.UpdateTotal();
-                _screen.Reset();
+                _scorePresenter.UpdateTotal();
+                _scorePresenter.Reset();
                 entity.Remove<ResetScoreComponent>();
             });
 
@@ -69,11 +73,9 @@ namespace Scripts.Ecs.Systems
                     break;
             }
 
-            _screen.AddScore(points, mult);
+            _scorePresenter.AddScore(points, mult);
         }
     }
-
-
 }
 
 namespace Scripts.Ecs.Components

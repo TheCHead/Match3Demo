@@ -5,6 +5,8 @@ using Scripts.DataModels;
 using Scripts.Ecs.Components;
 using Scripts.Ecs.Systems;
 using Scripts.GameView;
+using Scripts.UI;
+using Scripts.UI.Views;
 using Scripts.Utility;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -17,7 +19,8 @@ namespace Scripts.Ecs
         [SerializeField] private Tilemap tilemap;
         [SerializeField] private InputReader inputReader;
         [SerializeField] private List<GemTypeSO> gemTypes;
-        [SerializeField] private ScoreScreen scoreScreen;
+        [SerializeField] private ScoreView scoreScreen;
+        [SerializeField] private UIService uiService;
         private Group<float> _systems;
         private MonoPool<Gem> _gemPool;
 
@@ -36,6 +39,8 @@ namespace Scripts.Ecs
             PassiveItems.Items.Add(new Tower());
             PassiveItems.Items.Add(new Holy());
 
+            uiService.ShowScreen(EUIScreen.Score);
+
             _systems = new Group<float>(
                 "Match3",
                 new InitializeGridSystem(world),
@@ -47,7 +52,7 @@ namespace Scripts.Ecs
                 new MatchGemsSystem(world),
                 new TriggerDispatchSystem(world),
                 new TriggerGemsSystem(world),
-                new ScoreSystem(world, scoreScreen),
+                new ScoreSystem(world, uiService),
                 new ExplodeGemsSystem(world),
                 new GemFallSystem(world),
                 new UnblockGridSystem(world)
