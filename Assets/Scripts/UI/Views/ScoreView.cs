@@ -32,6 +32,16 @@ namespace Scripts.UI.Views
                 totalLabel.text = Mathf.RoundToInt(from).ToString();
             });
         }
+
+        public void Enable()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Disable()
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public interface IScoreView : IView

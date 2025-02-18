@@ -6,10 +6,10 @@ using Scripts.Ecs.Components;
 using Scripts.Ecs.Systems;
 using Scripts.GameView;
 using Scripts.UI;
-using Scripts.UI.Views;
 using Scripts.Utility;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Zenject;
 
 namespace Scripts.Ecs
 {
@@ -19,10 +19,15 @@ namespace Scripts.Ecs
         [SerializeField] private Tilemap tilemap;
         [SerializeField] private InputReader inputReader;
         [SerializeField] private List<GemTypeSO> gemTypes;
-        [SerializeField] private ScoreView scoreScreen;
-        [SerializeField] private UIService uiService;
+        private UIService _uiService;
         private Group<float> _systems;
         private MonoPool<Gem> _gemPool;
+
+        [Inject]
+        public void Inject(UIService uIService)
+        {
+            _uiService = uIService;
+        }
 
         private void Start() 
         {
@@ -39,8 +44,6 @@ namespace Scripts.Ecs
             PassiveItems.Items.Add(new Tower());
             PassiveItems.Items.Add(new Holy());
 
-            uiService.ShowScreen(EUIScreen.Score);
-
             _systems = new Group<float>(
                 "Match3",
                 new InitializeGridSystem(world),
@@ -52,7 +55,7 @@ namespace Scripts.Ecs
                 new MatchGemsSystem(world),
                 new TriggerDispatchSystem(world),
                 new TriggerGemsSystem(world),
-                new ScoreSystem(world, uiService),
+                new ScoreSystem(world, _uiService),
                 new ExplodeGemsSystem(world),
                 new GemFallSystem(world),
                 new UnblockGridSystem(world)

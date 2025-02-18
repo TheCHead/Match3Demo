@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Scripts.UI.Models;
 using Scripts.UI.Presenters;
 using Scripts.UI.Views;
-
+using Zenject;
 namespace Scripts.UI
 {
     public class PresenterFactory
@@ -13,24 +13,31 @@ namespace Scripts.UI
         private readonly Dictionary<EUIScreen, IPresenter> _cachedPresenters;
 
 
+        [Inject]
         public PresenterFactory(ViewFactory viewFactory)
         {
             _viewFactory = viewFactory;
 
             _presenterBuilders = new Dictionary<EUIScreen, Func<IPresenter>>
             {
-                { EUIScreen.Score, () => CreatePresenter<ScorePresenter, ScoreModel, ScoreView>() },
+                { EUIScreen.MainMenu, () => CreatePresenter<MainMenuPresenter, MainMenuModel, MainMenuView>() },
+                { EUIScreen.Score, () => CreatePresenter<ScorePresenter, ScoreModel, ScoreView>() }
             };
 
             _cachedPresenters = new Dictionary<EUIScreen, IPresenter>();
         }
 
-        private IPresenter CreatePresenter<TPresenter, TModel, TView>()
+        private IPresenter CreatePresenter<TPresenter, TModel, TView>(params object[] additionalArgs)
         where TPresenter : IPresenter
         where TView : IView
         where TModel : new()
         {
-            return (TPresenter)Activator.CreateInstance(typeof(TPresenter), new TModel(), _viewFactory.GetView<TView>());
+            var view = _viewFactory.GetView<TView>();
+            var model = new TModel();
+
+            var args = new List<object> { model, view };
+            args.AddRange(additionalArgs);
+            return (TPresenter)Activator.CreateInstance(typeof(TPresenter), args.ToArray());
         }
 
         public IPresenter GetPresenter(EUIScreen screen)

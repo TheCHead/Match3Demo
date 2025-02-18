@@ -10,14 +10,9 @@ namespace Scripts.UI
         private readonly Dictionary<Type, string> _viewPaths = new()
         {
             { typeof(ScoreView), "UI/Views/ScoreView" },
+            { typeof(MainMenuView), "UI/Views/MainMenuView" }
         };
         private readonly Dictionary<string, GameObject> _cachedPrefabs = new();
-        private Transform _container;
-
-        public ViewFactory(Transform container)
-        {
-            _container = container;
-        }
 
         public TView GetView<TView>() where TView : IView
         {
@@ -29,7 +24,7 @@ namespace Scripts.UI
             }
 
             var prefab = LoadPrefab(prefabPath);
-            var viewInstance = GameObject.Instantiate(prefab, _container).GetComponent<TView>();
+            var viewInstance = GameObject.Instantiate(prefab).GetComponent<TView>();
 
             return viewInstance;
         }

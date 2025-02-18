@@ -1,4 +1,4 @@
-namespace Scripts.StateMachine
+namespace Scripts.States
 {
     public enum EGameState
     {

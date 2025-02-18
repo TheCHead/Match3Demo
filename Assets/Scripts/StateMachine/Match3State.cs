@@ -1,24 +1,27 @@
 using Cysharp.Threading.Tasks;
+using Scripts.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-namespace Scripts.StateMachine
+namespace Scripts.States
 {
     public class Match3State : IState
     {
+        private UIService _uiService;
+        public Match3State(UIService uiService)
+        {
+            _uiService = uiService;
+        }
         public async UniTask Enter(IState prevState)
         {
-            Debug.Log("Enter Match3Game");
-            // TODO extract loading to SceneLoading service
-            // Init score presenter
-            SceneManager.LoadScene("Match3");
+            await SceneManager.LoadSceneAsync("Match3");
+            _uiService.ShowScreen(EUIScreen.Score);
             await UniTask.NextFrame();
         }
 
         public async UniTask Exit(IState nextState)
         {
-            Debug.Log("Exit Match3Game");
             await UniTask.NextFrame();
         }
     }

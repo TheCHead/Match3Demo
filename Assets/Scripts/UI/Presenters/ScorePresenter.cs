@@ -1,6 +1,5 @@
 using Scripts.UI.Models;
 using Scripts.UI.Views;
-using UnityEngine;
 
 namespace Scripts.UI.Presenters
 {
@@ -15,9 +14,14 @@ namespace Scripts.UI.Presenters
             _view = view;
         }
 
+        public void Dispose()
+        {
+            _view.Disable();
+        }
+
         public void Initialize()
         {
-            Debug.Log("Score Initialized");
+            _view.Enable();
         }
 
         public void OnScore(float score, float mult)

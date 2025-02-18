@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace Scripts.StateMachine
+namespace Scripts.States
 {
     public interface IState 
     {

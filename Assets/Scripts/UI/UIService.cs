@@ -1,36 +1,28 @@
 using System.Collections.Generic;
 using Scripts.UI.Presenters;
-using UnityEngine;
+using Zenject;
 
 namespace Scripts.UI
 {
-    public class UIService : MonoBehaviour
+    public class UIService
     {
-        [SerializeField] private Transform uiContainer;
-
-        private ViewFactory _viewFactory;
         private PresenterFactory _presenterFactory;
         private readonly Dictionary<EUIScreen, IPresenter> _activePresenters = new();
 
-        private void Awake()
+        [Inject]
+        public UIService(PresenterFactory presenterFactory, ViewFactory viewFactory)
         {
-            _viewFactory = new ViewFactory(uiContainer);
-            _presenterFactory = new PresenterFactory(_viewFactory);
-        }
-
-        void Start()
-        {
-            ShowScreen(EUIScreen.Score);
+            _presenterFactory = presenterFactory;
         }
 
         public void ShowScreen(EUIScreen screen)
         {
             if (_activePresenters.ContainsKey(screen))
-                return; // Screen is already active
+                return; 
 
             IPresenter presenter = _presenterFactory.GetPresenter(screen);
-
             _activePresenters[screen] = presenter;
+            presenter.Initialize();
         }
 
         public void HideScreen(EUIScreen screen)
@@ -38,8 +30,7 @@ namespace Scripts.UI
             if (_activePresenters.TryGetValue(screen, out var presenter))
             {
                 _activePresenters.Remove(screen);
-                //presenter.Dispose();
-                //_presenterFactory.DisposePresenter(screen); // Remove from cache
+                presenter.Dispose();
             }
         }
 
@@ -49,7 +40,6 @@ namespace Scripts.UI
             {
                 return presenter;
             }
-
             return null;
         }
     }
